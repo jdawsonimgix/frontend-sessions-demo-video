@@ -42,10 +42,7 @@ function App() {
 
       //Set session to CLOSED.
       const sessionStatusForAxios = await axios
-        .post(
-          "https://backend-sessions-demo.vercel.app/checkImgixCloseSession",
-          valueData
-        )
+        .post("http://localhost:5001/checkImgixCloseSession", valueData)
         .then(console.log("Client - CLOSE imgix session"))
         .catch((error) => console.log(error.message));
 
@@ -61,10 +58,7 @@ function App() {
     // "https://backend-sessions-demo.vercel.app/startImgixSession",
 
     const retrievedBackendData = await axios
-      .post(
-        "https://backend-sessions-demo.vercel.app/startImgixSession",
-        formData
-      )
+      .post("http://localhost:5001/startImgixSession", formData)
       .then(console.log("starting imgix session"))
       .catch((error) => console.log(error.message));
 
@@ -83,10 +77,7 @@ function App() {
     const value = { grabbedSessionSourceID: sessionSourceId };
 
     const sessionStatusForAxios = await axios
-      .post(
-        "https://backend-sessions-demo.vercel.app/checkImgixSessionStatus",
-        value
-      )
+      .post("http://localhost:5001/checkImgixSessionStatus", value)
       .then(console.log("Session status was checked."))
       .catch((error) => console.log(error.message));
 
