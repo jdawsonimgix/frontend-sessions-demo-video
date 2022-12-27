@@ -4,6 +4,7 @@ import Imgix from "react-imgix";
 import "./App.css";
 import VideoJS from "./VideoJS";
 import videojs from "video.js";
+import "video.js/dist/video-js.css";
 
 function App() {
   const [pic, setPic] = useState();
@@ -13,7 +14,7 @@ function App() {
   const [sessionStatus, setSessionStatus] = useState("No Status");
   const [sessionFilename, setSessionFilename] = useState("");
   const [searchArray, setSearchArray] = useState([]);
-  const [imgixUrl, setImgixUrl] = useState();
+  const [imgixUrl, setImgixUrl] = useState("");
 
   const playerRef = React.useRef(null);
   //src: "https://sourcerer.imgix.video/aa_video.mp4?fm=mp4",
@@ -124,9 +125,12 @@ function App() {
       </form>
       <br />
       <h3>The Session Status is: {sessionStatus}</h3>
-      <div>{searchArray.length === 0 && <h2>No image uploaded</h2>}</div>
-      <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
-
+      <div>{searchArray.length === 0 && <h2>No Video uploaded</h2>}</div>
+      <div className='test'>
+        {imgixUrl !== "" && (
+          <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
+        )}
+      </div>
       {/* <div className='container'>
         {searchArray.map((value, index) => (
           <Imgix
