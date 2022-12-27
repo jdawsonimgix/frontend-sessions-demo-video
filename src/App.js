@@ -1,7 +1,9 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Imgix from "react-imgix";
 import "./App.css";
+import VideoJS from "./VideoJS";
+import videojs from "video.js";
 
 function App() {
   const [pic, setPic] = useState();
@@ -12,6 +14,35 @@ function App() {
   const [sessionFilename, setSessionFilename] = useState("");
   const [searchArray, setSearchArray] = useState([]);
   const [imgixUrl, setImgixUrl] = useState();
+
+  const playerRef = React.useRef(null);
+  //src: "https://sourcerer.imgix.video/aa_video.mp4?fm=mp4",
+
+  const videoJsOptions = {
+    autoplay: true,
+    controls: true,
+    responsive: true,
+    fluid: true,
+    sources: [
+      {
+        src: imgixUrl,
+        type: "video/mp4",
+      },
+    ],
+  };
+
+  const handlePlayerReady = (player) => {
+    playerRef.current = player;
+
+    // You can handle player events here, for example:
+    player.on("waiting", () => {
+      videojs.log("player is waiting");
+    });
+
+    player.on("dispose", () => {
+      videojs.log("player will dispose");
+    });
+  };
 
   useEffect(() => {
     //Used to set PENDING to CLOSED
@@ -28,7 +59,7 @@ function App() {
     }
     if (sessionStatus === "COMPLETE") {
       setSearchArray(sessionFilename);
-      setImgixUrl("https://sourcerer.imgix.net/" + sessionFilename);
+      setImgixUrl("https://sourcerer.imgix.net/" + sessionFilename + "?fm=mp4");
     }
   }, [sessionStatus]);
 
@@ -94,7 +125,9 @@ function App() {
       <br />
       <h3>The Session Status is: {sessionStatus}</h3>
       <div>{searchArray.length === 0 && <h2>No image uploaded</h2>}</div>
-      <div className='container'>
+      <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
+
+      {/* <div className='container'>
         {searchArray.map((value, index) => (
           <Imgix
             src={"https://sourcerer.imgix.net/" + value}
@@ -104,7 +137,7 @@ function App() {
             imgixParams={{ auto: "format,compress,enhance", fit: "crop" }}
           />
         ))}
-      </div>
+      </div> */}
       <h4>{imgixUrl}</h4>
     </div>
   );
