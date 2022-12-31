@@ -15,6 +15,7 @@ function App() {
   const [sessionFilename, setSessionFilename] = useState("");
   const [searchArray, setSearchArray] = useState([]);
   const [imgixUrl, setImgixUrl] = useState("");
+  const [signedUrl, setSignedUrl] = useState("");
 
   const playerRef = React.useRef(null);
   //src: "https://sourcerer.imgix.video/aa_video.mp4?fm=mp4",
@@ -60,9 +61,11 @@ function App() {
     }
     if (sessionStatus === "COMPLETE") {
       setSearchArray(sessionFilename);
-      setImgixUrl("https://sourcerer.imgix.net/" + sessionFilename + "?fm=mp4");
+      setImgixUrl(
+        "https://sourcerer.imgix.video/" + sessionFilename + "?fm=mp4"
+      );
     }
-  }, [sessionStatus]);
+  }, [sessionStatus]); ////
 
   //Used to set PENDING status to CLOSED.
   const checkIfClosed = async (e) => {
@@ -85,21 +88,32 @@ function App() {
   //IMGIX EXAMPLES: STARTING SESSION
   const imgixHandleSubmitForSessionStarting = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
-    formData.append("pic", pic);
-    // "https://backend-sessions-demo.vercel.app/startImgixSession",
 
     const retrievedBackendData = await axios
-      .post("http://localhost:5001/startImgixSession", formData)
-      .then(console.log("starting imgix session"))
+      .post("http://localhost:5001/startImgixSession", {
+        originalname: pic.name,
+        mimetype: pic.type,
+      })
+      .then(async (res) => {
+        console.log(res);
+        let tempFilename = res.data.sessionFilenameBackend;
+        let myArrayForFilename = tempFilename.split();
+        setSessionFilename(myArrayForFilename);
+        setSessionSourceId(res.data.sessionIdBackend);
+        setSessionStatus(res.data.sessionStatusBackend);
+        let testURLHERE = res.data.sessionPresignedUrlBackend;
+        console.log("testURLHERE is: " + testURLHERE);
+        await axios(res.data.sessionPresignedUrlBackend, {
+          method: "PUT",
+          data: pic,
+          headers: {
+            "Content-Type": pic.type,
+          },
+        }).then(checkIfClosed);
+      })
       .catch((error) => console.log(error.message));
-
-    let tempFilename = retrievedBackendData.data.sessionFilenameBackend;
-    let myArrayForFilename = tempFilename.split();
-    setSessionSourceId(retrievedBackendData.data.sessionIdBackend);
-    setSessionStatus(retrievedBackendData.data.sessionStatusBackend);
-    setSessionFilename(myArrayForFilename);
   };
+
   const imgixHandleChangeForSessionStarting = (e) => {
     setPic(e.target.files[0]);
   };
@@ -107,13 +121,16 @@ function App() {
   //IMGIX EXAMPLE: CHECK SESSION STATUS
   const imgixHandleCheckStatus = async () => {
     const value = { grabbedSessionSourceID: sessionSourceId };
+    console.log("value is:");
+    console.log(value);
 
     const sessionStatusForAxios = await axios
       .post("http://localhost:5001/checkImgixSessionStatus", value)
-      .then(console.log("Session status was checked."))
+      .then((res) => {
+        console.log(res);
+        setSessionStatus(res.data.data.attributes.status);
+      })
       .catch((error) => console.log(error.message));
-
-    setSessionStatus(sessionStatusForAxios.data.data.attributes.status);
   };
 
   return (
@@ -121,7 +138,7 @@ function App() {
       <form className='form' onSubmit={imgixHandleSubmitForSessionStarting}>
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <br />
-        <button>Upload Image</button>
+        <button>Upload Video</button>
       </form>
       <br />
       <h3>The Session Status is: {sessionStatus}</h3>
