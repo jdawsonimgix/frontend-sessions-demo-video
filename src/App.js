@@ -16,6 +16,7 @@ function App() {
   const [searchArray, setSearchArray] = useState([]);
   const [imgixUrl, setImgixUrl] = useState("");
   const [signedUrl, setSignedUrl] = useState("");
+  const [videoProcessStatus, setVideoProcessStatus] = useState("No Status");
 
   const playerRef = React.useRef(null);
   //src: "https://sourcerer.imgix.video/aa_video.mp4?fm=mp4",
@@ -54,11 +55,19 @@ function App() {
     //Use to set CLOSED status to COMPLETE
     if (sessionStatus === "CLOSED") {
       const interval = setInterval(() => {
-        console.log("This will run every 7 seconds!");
+        console.log("This will check if it's closed ever 7 seconds!");
         imgixHandleCheckStatus();
       }, 7000);
       return () => clearInterval(interval);
     }
+
+    //if sessionStatus is complete AND video_imgix_status is NOT equal to VIDEO_READY
+    //Set interval command to check status
+
+    //ifvideo_imgix_status IS EQUAL to VIDEO_READY && sesionStatus is COMPLETE
+    //Apply URL
+
+    //Old code:
     if (sessionStatus === "COMPLETE") {
       setSearchArray(sessionFilename);
       setImgixUrl(
@@ -66,6 +75,19 @@ function App() {
       );
     }
   }, [sessionStatus]); ////
+
+  //Function to check if videoProcessStatus
+  const checkVideoProcess = async (e) => {
+    console.log("checkVideoProcessStatus function");
+
+    //Set session to CLOSED.
+    const videoProcessAxios = await axios
+      .post("http://localhost:5001/checkVideoProcessStatus", sessionFilename)
+      .then(console.log("Client - Checked video Processing"))
+      .catch((error) => console.log(error.message));
+
+    console.log(videoProcessAxios.data);
+  };
 
   //Used to set PENDING status to CLOSED.
   const checkIfClosed = async (e) => {
@@ -135,6 +157,7 @@ function App() {
 
   return (
     <div className='app'>
+      <button onClick={checkVideoProcess}>Check processing</button>
       <form className='form' onSubmit={imgixHandleSubmitForSessionStarting}>
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <br />
