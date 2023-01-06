@@ -61,21 +61,21 @@ function App() {
       return () => clearInterval(interval);
     }
 
-    //if sessionStatus is complete AND video_imgix_status is NOT equal to VIDEO_READY
-    //Set interval command to check status
-
-    //ifvideo_imgix_status IS EQUAL to VIDEO_READY && sesionStatus is COMPLETE
-    //Apply URL
-
-    //Old code:
-    if (sessionStatus === "COMPLETE") {
+    if (sessionStatus === "COMPLETE" && videoProcessStatus !== "VIDEO_READY") {
+      const intervalForProcessStatus = setInterval(() => {
+        console.log("This will check videoProcessStatus every 7 seconds!");
+        checkVideoProcess();
+      }, 7000);
+      return () => clearInterval(intervalForProcessStatus);
+    }
+    if (sessionStatus === "COMPLETE" && videoProcessStatus === "VIDEO_READY") {
       setSearchArray(sessionFilename);
       setImgixUrl(
         "https://sourcerer.imgix.video/" + sessionFilename + "?fm=mp4"
       );
     }
-  }, [sessionStatus]); ////
-
+  }, [sessionStatus, videoProcessStatus]); ////////////////
+  //
   //Function to check if videoProcessStatus
   const checkVideoProcess = async (e) => {
     console.log("checkVideoProcessStatus function");
@@ -87,6 +87,7 @@ function App() {
       .catch((error) => console.log(error.message));
 
     console.log(videoProcessAxios.data);
+    setVideoProcessStatus(videoProcessAxios.data);
   };
 
   //Used to set PENDING status to CLOSED.
@@ -154,6 +155,7 @@ function App() {
       })
       .catch((error) => console.log(error.message));
   };
+  ////////////
 
   return (
     <div className='app'>
@@ -165,6 +167,7 @@ function App() {
       </form>
       <br />
       <h3>The Session Status is: {sessionStatus}</h3>
+      <h3>Video process status is: {videoProcessStatus}</h3>
       <div>{searchArray.length === 0 && <h2>No Video uploaded</h2>}</div>
       <div className='test'>
         {imgixUrl !== "" && (
