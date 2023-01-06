@@ -29,7 +29,7 @@ function App() {
     sources: [
       {
         src: imgixUrl,
-        type: "video/mp4",
+        type: "application/x-mpegURL",
       },
     ],
   };
@@ -71,11 +71,11 @@ function App() {
     if (sessionStatus === "COMPLETE" && videoProcessStatus === "VIDEO_READY") {
       setSearchArray(sessionFilename);
       setImgixUrl(
-        "https://sourcerer.imgix.video/" + sessionFilename + "?fm=mp4"
+        "https://sourcerer.imgix.video/" + sessionFilename + "?fm=hls"
       );
     }
-  }, [sessionStatus, videoProcessStatus]); ////////////////
-  //
+  }, [sessionStatus, videoProcessStatus]);
+
   //Function to check if videoProcessStatus
   const checkVideoProcess = async (e) => {
     console.log("checkVideoProcessStatus function");
