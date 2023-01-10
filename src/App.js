@@ -11,12 +11,16 @@ function App() {
   const [sessionSourceId, setSessionSourceId] = useState(
     "no session. Please choose a file"
   ); //Used to check status.
-  const [sessionStatus, setSessionStatus] = useState("No Status");
+  const [sessionStatus, setSessionStatus] = useState("");
   const [sessionFilename, setSessionFilename] = useState("");
   const [searchArray, setSearchArray] = useState([]);
   const [imgixUrl, setImgixUrl] = useState("");
-  const [signedUrl, setSignedUrl] = useState("");
-  const [videoProcessStatus, setVideoProcessStatus] = useState("No Status");
+  const [signedUrl, setSignedUrl] = useState(""); //backend status
+  const [videoProcessStatus, setVideoProcessStatus] = useState(""); //backend status
+  const [displayedSessionStatus, setDisplayedSessionStatus] =
+    useState("No session status"); //frontend displayed
+  const [displayedProcessStatus, setDisplayedProcessStatus] =
+    useState("No process status"); //frontend displayed
 
   const playerRef = React.useRef(null);
   //src: "https://sourcerer.imgix.video/aa_video.mp4?fm=mp4",
@@ -62,6 +66,8 @@ function App() {
     }
 
     if (sessionStatus === "COMPLETE" && videoProcessStatus !== "VIDEO_READY") {
+      setDisplayedSessionStatus("The session is complete!");
+      setDisplayedProcessStatus("Your video is processing.");
       const intervalForProcessStatus = setInterval(() => {
         console.log("This will check videoProcessStatus every 7 seconds!");
         checkVideoProcess();
@@ -70,6 +76,9 @@ function App() {
     }
     if (sessionStatus === "COMPLETE" && videoProcessStatus === "VIDEO_READY") {
       setSearchArray(sessionFilename);
+      setDisplayedSessionStatus("The session is complete!");
+      setDisplayedProcessStatus("Your video can now be played!");
+
       setImgixUrl(
         "https://sourcerer.imgix.video/" + sessionFilename + "?fm=hls"
       );
@@ -143,6 +152,8 @@ function App() {
           },
         });
         setSessionStatus(res.data.sessionStatusBackend);
+        setDisplayedSessionStatus("The session is processing. Please wait.");
+        setDisplayedProcessStatus("Will process soon.");
       })
       .then(checkIfClosed())
       .catch((error) => console.log(error.message));
@@ -178,16 +189,15 @@ function App() {
         <button>Upload Video</button>
       </form>
       <br />
-      <h3>The Session Status is: {sessionStatus}</h3>
-      <h3>Video process status is: {videoProcessStatus}</h3>
+      <h3>The Session Status is: {displayedSessionStatus}</h3>
+      <h3>Video process status is: {displayedProcessStatus}</h3>
+      <h4>{imgixUrl}</h4>
       <div>{searchArray.length === 0 && <h2>No Video uploaded</h2>}</div>
       <div className='test'>
         {imgixUrl !== "" && (
           <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
         )}
       </div>
-
-      <h4>{imgixUrl}</h4>
     </div>
   );
 }
