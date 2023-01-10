@@ -82,7 +82,10 @@ function App() {
 
     //Set session to CLOSED.
     const videoProcessAxios = await axios
-      .post("http://localhost:5001/checkVideoProcessStatus", sessionFilename)
+      .post(
+        "https://backend-sessions-demo-video.vercel.app/checkVideoProcessStatus",
+        sessionFilename
+      )
       .then(console.log("Client - Checked video Processing"))
       .catch((error) => console.log(error.message));
 
@@ -100,7 +103,10 @@ function App() {
 
       //Set session to CLOSED.
       const sessionStatusForAxios = await axios
-        .post("http://localhost:5001/checkImgixCloseSession", valueData)
+        .post(
+          "https://backend-sessions-demo-video.vercel.app/checkImgixCloseSession",
+          valueData
+        )
         .then(console.log("Client - CLOSE imgix session"))
         .catch((error) => console.log(error.message));
 
@@ -113,17 +119,20 @@ function App() {
     e.preventDefault();
 
     const retrievedBackendData = await axios
-      .post("http://localhost:5001/startImgixSession", {
-        originalname: pic.name,
-        mimetype: pic.type,
-      })
+      .post(
+        "https://backend-sessions-demo-video.vercel.app/startImgixSession",
+        {
+          originalname: pic.name,
+          mimetype: pic.type,
+        }
+      )
       .then(async (res) => {
         console.log(res);
         let tempFilename = res.data.sessionFilenameBackend;
         let myArrayForFilename = tempFilename.split();
         setSessionFilename(myArrayForFilename);
         setSessionSourceId(res.data.sessionIdBackend);
-        setSessionStatus(res.data.sessionStatusBackend);
+        // setSessionStatus(res.data.sessionStatusBackend);
         let testURLHERE = res.data.sessionPresignedUrlBackend;
         console.log("testURLHERE is: " + testURLHERE);
         await axios(res.data.sessionPresignedUrlBackend, {
@@ -132,8 +141,10 @@ function App() {
           headers: {
             "Content-Type": pic.type,
           },
-        }).then(checkIfClosed);
+        });
+        setSessionStatus(res.data.sessionStatusBackend);
       })
+      .then(checkIfClosed())
       .catch((error) => console.log(error.message));
   };
 
@@ -148,18 +159,19 @@ function App() {
     console.log(value);
 
     const sessionStatusForAxios = await axios
-      .post("http://localhost:5001/checkImgixSessionStatus", value)
+      .post(
+        "https://backend-sessions-demo-video.vercel.app/checkImgixSessionStatus",
+        value
+      )
       .then((res) => {
         console.log(res);
         setSessionStatus(res.data.data.attributes.status);
       })
       .catch((error) => console.log(error.message));
   };
-  ////////////
 
   return (
     <div className='app'>
-      <button onClick={checkVideoProcess}>Check processing</button>
       <form className='form' onSubmit={imgixHandleSubmitForSessionStarting}>
         <input type='file' onChange={imgixHandleChangeForSessionStarting} />
         <br />
@@ -174,17 +186,7 @@ function App() {
           <VideoJS options={videoJsOptions} onReady={handlePlayerReady} />
         )}
       </div>
-      {/* <div className='container'>
-        {searchArray.map((value, index) => (
-          <Imgix
-            src={"https://sourcerer.imgix.net/" + value}
-            width={200}
-            height={200}
-            key={index}
-            imgixParams={{ auto: "format,compress,enhance", fit: "crop" }}
-          />
-        ))}
-      </div> */}
+
       <h4>{imgixUrl}</h4>
     </div>
   );
